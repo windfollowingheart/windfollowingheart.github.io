@@ -6,7 +6,7 @@
   <link href="http://example.com/atom.xml" rel="self"/>
   
   <link href="http://example.com/"/>
-  <updated>2024-03-01T14:03:25.849Z</updated>
+  <updated>2024-03-12T12:08:23.208Z</updated>
   <id>http://example.com/</id>
   
   <author>
@@ -15,6 +15,26 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>git日常1</title>
+    <link href="http://example.com/2024/03/12/git%E6%97%A5%E5%B8%B81/"/>
+    <id>http://example.com/2024/03/12/git%E6%97%A5%E5%B8%B81/</id>
+    <published>2024-03-12T12:07:11.000Z</published>
+    <updated>2024-03-12T12:08:23.208Z</updated>
+    
+    <content type="html"><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><h4 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h4><h5 id="1-使用pull后没有将远程文件下载来"><a href="#1-使用pull后没有将远程文件下载来" class="headerlink" title="1.使用pull后没有将远程文件下载来"></a>1.使用pull后没有将远程文件下载来</h5><p>可能是本地和远程分支搞反了</p><p>也可以使用fetch然后merge,</p><p>如果提示fatal: refusing to merge unrelated histories，就使用：</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">当在Git中执行git merge命令时，出现&quot;fatal: refusing to merge unrelated histories&quot;错误提示，这通常是因为要合并的两个分支没有共同的提交历史，被认为是不相关的分支。</span><br><span class="line"></span><br><span class="line">这种情况通常发生在两个分支之间没有共同的祖先提交，或者其中一个分支是在完全不同的代码库中创建的。</span><br><span class="line"></span><br><span class="line">如果你确定要合并这两个不相关的分支，可以在git merge命令后添加--allow-unrelated-histories选项来允许合并不相关的历史。例如：</span><br><span class="line">git merge branch1 --allow-unrelated-histories</span><br></pre></td></tr></table></figure><p>然后将fetch的分支合并到q_2：</p><p>git checkout q_2</p><p>git branch -a:</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">  master</span><br><span class="line">* q_2</span><br><span class="line">  remotes/r1/qt_cut_test_2</span><br></pre></td></tr></table></figure><p>git merge remotes&#x2F;r1&#x2F;qt_cut_test_2</p><p>然后就可以看到远程的文件了。</p><h5 id="2-使用git-pull-f-r1-远程-本地"><a href="#2-使用git-pull-f-r1-远程-本地" class="headerlink" title="2.使用git pull -f r1 远程:本地"></a>2.使用git pull -f r1 远程:本地</h5><p>这样远程的文件就会将本地的文件覆盖掉。</p><p>如何恢复呢？</p><p>首先使用git reflog查看提交信息：</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">$ git reflog</span><br><span class="line">2ae4d38 (HEAD, qt_cut_test_2) HEAD@&#123;0&#125;: checkout: moving from qt_cut_test_2 to 2ae4d38</span><br><span class="line">2ae4d38 (HEAD, qt_cut_test_2) HEAD@&#123;1&#125;: reset: moving to 2ae4d38</span><br><span class="line">fe8c64a (master) HEAD@&#123;2&#125;: reset: moving to fe8c64a</span><br><span class="line">2ae4d38 (HEAD, qt_cut_test_2) HEAD@&#123;3&#125;: reset: moving to 2ae4d38</span><br><span class="line">cc8f420 (r1/qt_cut_test_2) HEAD@&#123;4&#125;: checkout: moving from master to qt_cut_test_2</span><br><span class="line">fe8c64a (master) HEAD@&#123;5&#125;: checkout: moving from qt_cut_test_2 to master</span><br><span class="line">cc8f420 (r1/qt_cut_test_2) HEAD@&#123;6&#125;: pull -f r1 qt_cut_test_2:qt_cut_test_2: forced-update</span><br><span class="line">2ae4d38 (HEAD, qt_cut_test_2) HEAD@&#123;7&#125;: commit: qt_1</span><br><span class="line">fe8c64a (master) HEAD@&#123;8&#125;: checkout: moving from master to qt_cut_test_2</span><br><span class="line">fe8c64a (master) HEAD@&#123;9&#125;: commit (initial): master_c_1</span><br></pre></td></tr></table></figure><p>第一列类似2ae4d38 是<commit-hash>类似id。然后发现我是再commit qt_1之后使用了pull -f强制拉取了分支导致覆盖了本地分支文件。id是2ae4d38</p><p>然后使用git reset <commit-hash>后打印：</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Unstaged changes after reset:</span><br><span class="line">D cut_test_2.pro</span><br><span class="line">D cut_test_2.pro.user</span><br><span class="line">D cutoptions.cpp</span><br><span class="line">...</span><br></pre></td></tr></table></figure><p>然后尝试使用 git checkout –cut_test_2.pro 发现文件恢复了。</p><p>然后使用git checkout –*.h 就可以恢复所有.h后缀的文件，然后将所有文件依次恢复。</p><p>还好之前使用git add –all 并且commit了，不然可能九回复不了了，因为没有保存信息。</p><p>以后使用类似这种危险操作一定要备份文件。</p><h4 id="完整流程"><a href="#完整流程" class="headerlink" title="完整流程"></a>完整流程</h4><p>经过测试，之前出现那么多问题是因为pull的时候远程和本地分支搞反了</p><p>正确流程：</p><p>git init</p><p>git remote add r1 …</p><p>git remote -v</p><p>git add …</p><p>git commit -m …</p><p>git branch -a</p><p>git pull r1远程:master</p><p>git branch -a  &#x2F;&#x2F;一个master，一个远程</p><p>git checkout master</p><p>git merge 远程 –allow-unrelated-histories</p><p>git push master:远程</p>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;link rel=&quot;stylesheet&quot; class=&quot;aplayer-secondary-style-marker&quot; href=&quot;&#92;assets&#92;css&#92;APlayer.min.css&quot;&gt;&lt;script src=&quot;&#92;assets&#92;js&#92;APlayer.min.js&quot; cla</summary>
+      
+    
+    
+    
+    
+  </entry>
   
   <entry>
     <title>我的first博客测试</title>
